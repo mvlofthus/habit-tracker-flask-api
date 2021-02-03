@@ -12,13 +12,17 @@ create new .py file
 save
 
 $export FLASK_APP = api.py
+
 $python3 -m flask fun
 
 To connect to react:
+
 $pip3 install -U flask-cors
 
 inside api.py:
+
 from flask_cors import CORS
+
 CORS(app)
 
 see requirements.txt for installed packages...
