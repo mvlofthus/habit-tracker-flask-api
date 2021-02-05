@@ -72,7 +72,7 @@ class Task(db.Model):
         self.body = body
 
     def __repr__(self):
-        return '<Task %r>' % self.task_id
+        return '<Task %r>' % self.id
 
 class TaskSchema(ma.Schema):
     class Meta:
@@ -172,8 +172,6 @@ def user():
         else:
             return {"error": "The request payload is not in JSON format"}
     elif request.method == 'GET':
-        # db.session.add(User("mackenzie", "testemail", "123"))
-        # db.session.commit()
         users = User.query.all()
         results = [
             {
@@ -198,6 +196,47 @@ def user():
     #     db.session.delete(car)
     #     db.session.commit()
     #     return {"message": f"Car {car.name} successfully deleted."}
+
+
+@app.route('/tasks', methods=["GET", "POST", "PUT", "DELETE"])
+def task():
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json()
+            new_task = Task(user_id=data['user_id'], category_id=data['category_id'], goal_id=data['goal_id'], date=data['date'], body=data['body'])
+            db.session.add(new_task)
+            db.session.commit()
+            return {"message": f"task {new_task.id} has been created successfully."}
+        else:
+            return {"error": "The request payload is not in JSON format"}
+    elif request.method == 'GET':
+        tasks = Task.query.all()
+        results = [
+            {
+                "id": task.id,
+                "user_id": task.user_id,
+                "category_id": task.category_id,
+                "date": task.date,
+                "body": task.body
+            } for task in tasks]
+
+        return {"count": len(results), "tasks": results}
+    
+    elif request.method == 'PUT':
+        data = request.get_json()
+        task.category_id = data['category_id']
+        task.goal_id = data['goal_id']
+        task.date = data['date']
+        task.body = data['body']
+        db.session.add(task)
+        db.session.commit()
+        return {"message": f"task {task.id} successfully updated"}
+
+    elif request.method == 'DELETE':
+        db.session.delete(task)
+        db.session.commit()
+        return {"message": f"Task {task.id} successfully deleted."}
+
 
 @app.route('/time')
 def get_current_time():
