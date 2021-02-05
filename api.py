@@ -159,7 +159,7 @@ migrate = Migrate(app, db)
 def home():
     return jsonify({"message": "testing 1,2,3"})
 
-
+#USERS 
 @app.route('/users', methods=["GET", "POST"])
 def user():
     if request.method == 'POST':
@@ -192,13 +192,9 @@ def user():
     #     db.session.commit()
     #     return {"message": f"car {car.name} successfully updated"}
 
-    # elif request.method == 'DELETE':
-    #     db.session.delete(car)
-    #     db.session.commit()
-    #     return {"message": f"Car {car.name} successfully deleted."}
 
-
-@app.route('/tasks', methods=["GET", "POST", "PUT", "DELETE"])
+#TASKS
+@app.route('/tasks', methods=["GET", "POST"])
 def task():
     if request.method == 'POST':
         if request.is_json:
@@ -215,14 +211,20 @@ def task():
             {
                 "id": task.id,
                 "user_id": task.user_id,
+                "user": task.user_id.name,
                 "category_id": task.category_id,
+                "goal_id": task.goal_id,
                 "date": task.date,
                 "body": task.body
             } for task in tasks]
 
         return {"count": len(results), "tasks": results}
-    
-    elif request.method == 'PUT':
+
+@app.route('/tasks/<task_id>', methods=["PUT", "DELETE"])
+def handle_task(task_id): 
+    task = TaskModel.query.get_or_404(task_id)  
+
+    if request.method == 'PUT':
         data = request.get_json()
         task.category_id = data['category_id']
         task.goal_id = data['goal_id']
@@ -236,6 +238,96 @@ def task():
         db.session.delete(task)
         db.session.commit()
         return {"message": f"Task {task.id} successfully deleted."}
+
+#CATEGORIES
+@app.route('/categories', methods=["GET", "POST", "PUT"])
+def category():
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json()
+            new_category = Category(title=data['title'])
+            db.session.add(new_category)
+            db.session.commit()
+            return {"message": f"category {new_category.title} has been created successfully."}
+        else:
+            return {"error": "The request payload is not in JSON format"}
+    elif request.method == 'GET':
+        categories = Category.query.all()
+        results = [
+            {
+                "id": category.id,
+                "title": category.title,
+            } for category in categories]
+
+        return {"count": len(results), "categories": results}
+    
+@app.route('/categories/<category_id>', methods=["PUT"])
+def handle_category(category_id): 
+    category = CategoryModel.query.get_or_404(category_id)    
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        category.title = data['title']
+        db.session.add(category)
+        db.session.commit()
+        return {"message": f"category {category.title} successfully updated"}
+
+
+
+#GOALS
+@app.route('/goals', methods=["GET", "POST"])
+def goal():
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json()
+            new_goal = Task(user_id=data['user_id'], category_id=data['category_id'], tag=data['tag'], description=data['description'], weekly_freq=data['weekly_freq'])
+            db.session.add(new_goal)
+            db.session.commit()
+            return {"message": f"goal {new_goal.tag} has been created successfully."}
+        else:
+            return {"error": "The request payload is not in JSON format"}
+    elif request.method == 'GET':
+        goals = Goal.query.all()
+        results = [
+            {
+                "id": goal.id,
+                "user_id": goal.user_id,
+                "category_id": goal.category_id,
+                "tag": goal.tag,
+                "description": goal.description,
+                "weekly_freq": goal.weekly_freq
+            } for goal in goals]
+
+        return {"count": len(results), "goals": results}
+
+@app.route('/goals/<goal_id>', methods=["GET", "PUT", "DELETE"])
+def handle_goal(goal_id): 
+    goal = GoalModel.query.get_or_404(goal_id)
+
+    if request.method == 'GET':
+        response = {
+                "user_id": goal.user_id,
+                "category_id": goal.category_id,
+                "tag": goal.tag,
+                "description": goal.description,
+                "weekly_freq": goal.weekly_freq
+            }
+
+        return {"message": success, "goal": response}
+    elif request.method == 'PUT':
+        data = request.get_json()
+        goal.category_id = data['category_id']
+        goal.tag = data['tag']
+        goal.description = data['description']
+        goal.weekly_freq = data['weekly_freq']
+        db.session.add(task)
+        db.session.commit()
+        return {"message": f"goal {goal.tag} successfully updated"}
+
+    elif request.method == 'DELETE':
+        db.session.delete(goal)
+        db.session.commit()
+        return {"message": f"Goal {goal.tag} successfully deleted."}
 
 
 @app.route('/time')
