@@ -211,7 +211,6 @@ def task():
             {
                 "id": task.id,
                 "user_id": task.user_id,
-                "user": task.user_id.name,
                 "category_id": task.category_id,
                 "goal_id": task.goal_id,
                 "date": task.date,
