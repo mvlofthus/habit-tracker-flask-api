@@ -10,6 +10,12 @@ from flask_marshmallow import Marshmallow
 # from marshmallow_sqlalchemy import ModelSchema
 from marshmallow import fields
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+dbUrl=os.getenv('DB_URL')
+dbUrlEnd=os.getenv('DB_UN_PW')
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +23,7 @@ CORS(app)
 
 # api = Api(app)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://myuser:xxxx@localhost/testdb"
+app.config["SQLALCHEMY_DATABASE_URI"] = dbUrl
 db = SQLAlchemy()
 db.init_app(app)
 ma = Marshmallow(app)
@@ -182,6 +188,7 @@ def user():
             } for user in users]
 
         return {"count": len(results), "users": results}
+        # return {"users": results}
     
     # elif request.method == 'PUT':
     #     data = request.get_json()
@@ -332,6 +339,11 @@ def handle_goal(goal_id):
 @app.route('/time')
 def get_current_time():
     return {'time': time.time()}
+
+@app.route('/array')
+def test_array():
+    array = ['first', 'second', 'third']
+    return jsonify(array)
 
 
 
