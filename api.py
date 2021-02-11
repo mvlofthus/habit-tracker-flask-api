@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-dbUrl=os.getenv('DB_URL')
+dbUrl=os.getenv('AWS_DB_URL')
 dbUrlEnd=os.getenv('DB_UN_PW')
 
 app = Flask(__name__)
